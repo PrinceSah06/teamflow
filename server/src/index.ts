@@ -1,14 +1,26 @@
 import express from "express";
 import cors from "cors";
-
+import cookieParser  from 'cookie-parser'
+import { db } from "./db";
+import { users as usersTable } from "./db/schema";
+import userRoute from "./routes/userRoutes";
 const app = express();
+
+interface registerUser{
+  email:string,
+  password:string
+}
 
 app.use(cors());
 app.use(express.json());
+app.use(cookieParser())
 
-app.get("/", (req, res) => {
-  res.send("Hello from server 🚀");
-});
+
+
+app.use("/",userRoute)
+
+
+
 
 const PORT = 5000;
 
