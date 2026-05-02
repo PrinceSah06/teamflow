@@ -1,8 +1,9 @@
 import { and, eq } from "drizzle-orm";
-import { Response, NextFunction } from "express";
+import { NextFunction, Response } from "express";
 import { db } from "../db";
 import { member } from "../db/schema";
 import { AuthRequest } from "../types/express";
+import { sendError } from "../utils/apiResponse";
 
 type Role = "owner" | "admin" | "member";
 
@@ -12,15 +13,11 @@ export const allowedUser = (allowedRoles: Role[]) => {
     const orgId = req.params.orgId;
 
     if (!userId) {
-      return res.status(401).json({
-        message: "Unauthorized user",
-      });
+      return sendError(res, 401, "Unauthorized user");
     }
 
     if (!orgId || typeof orgId !== "string") {
-      return res.status(400).json({
-        message: "Organization id is required",
-      });
+      return sendError(res, 400, "Organization id is required");
     }
 
     const membership = await db.query.member.findFirst({
@@ -28,15 +25,11 @@ export const allowedUser = (allowedRoles: Role[]) => {
     });
 
     if (!membership) {
-      return res.status(403).json({
-        message: "You are not a member of this organization",
-      });
+      return sendError(res, 403, "You are not a member of this organization");
     }
 
     if (!allowedRoles.includes(membership.role)) {
-      return res.status(403).json({
-        message: "You do not have permission to access this resource",
-      });
+      return sendError(res, 403, "You do not have permission to access this resource");
     }
 
     return next();

@@ -42,8 +42,6 @@ export const createUser = async ({ email, password }: CreateUserInput) => {
 };
 
 export const loginUser = async ({ email, password }: CreateUserInput) => {
-
-  console.log('....................login services here ...................')
   const existingUser = await db.query.users.findFirst({
     where: eq(users.email, email),
   });

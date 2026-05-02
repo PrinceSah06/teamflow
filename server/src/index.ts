@@ -1,15 +1,12 @@
 import express from "express";
 import cors from "cors";
-import cookieParser  from 'cookie-parser'
-import { db } from "./db";
-import { users as usersTable } from "./db/schema";
+import cookieParser from "cookie-parser";
 import userRoute from "./routes/userRoutes";
-const app = express();
+import orgRoute from "./routes/orgRoutes";
+import { errorHandler, notFoundHandler } from "./middleware/errorMiddleware";
 
-interface registerUser{
-  email:string,
-  password:string
-}
+const app = express();
+const PORT = 5000;
 
 app.use(
   cors({
@@ -18,16 +15,13 @@ app.use(
   })
 );
 app.use(express.json());
-app.use(cookieParser())
+app.use(cookieParser());
 
+app.use("/", userRoute);
+app.use("/", orgRoute);
 
-
-app.use("/",userRoute)
-
-
-
-
-const PORT = 5000;
+app.use(notFoundHandler);
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

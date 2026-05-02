@@ -17,11 +17,10 @@ export const generateRefreshToken = (userId: string) => {
   });
 };
 
-export const veryfyAccessToken = (token: string) => {
+export const verifyAccessToken = (token: string) => {
   return jwt.verify(token, env.ACCESS_TOKEN_SECRET) as TokenPayload;
 };
 
-
-export const veryRefereshToken = (token: string) => {
+export const verifyRefreshToken = (token: string) => {
   return jwt.verify(token, env.REFRESH_TOKEN_SECRET) as TokenPayload;
 };

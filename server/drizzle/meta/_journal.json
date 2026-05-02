@@ -15,6 +15,13 @@
       "when": 1777350343097,
       "tag": "0001_oval_multiple_man",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1777609520411,
+      "tag": "0002_wooden_multiple_man",
+      "breakpoints": true
     }
   ]
 }
