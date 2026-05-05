@@ -1,6 +1,6 @@
 # Teamflow
 
-Teamflow is a full-stack team and organization management app. It includes user authentication, JWT-based protected routes, organization membership, role checks, and invite links.
+Teamflow is a full-stack team and organization management app. It includes user authentication, JWT-based protected routes, organization membership, role checks, invite links, and organization notes.
 
 ## Tech Stack
 
@@ -124,6 +124,16 @@ Backend runs on `http://localhost:5000`.
 | POST | `/api/orgs/:orgId/invite-link` | Create an invite link for an organization |
 | POST | `/api/invites/:token/accept` | Accept an invite link |
 
+### Notes
+
+| Method | Route | Description |
+| --- | --- | --- |
+| POST | `/notes/:id` | Create a note for an organization |
+| GET | `/notes/:id` | Get all notes for an organization |
+| GET | `/notes/:orgId/:noteId` | Get a single organization note |
+| PATCH | `/notes/:orgId/:noteId` | Update an organization note |
+| DELETE | `/notes/:orgId/:noteId` | Delete an organization note |
+
 Protected routes require:
 
 ```http
@@ -137,6 +147,7 @@ Authorization: Bearer <access_token>
 - Access tokens are sent to the client after login.
 - Refresh tokens are stored as HTTP-only cookies.
 - Organization invite creation is restricted to `owner` and `admin` roles.
+- Notes are scoped to organizations and require membership access.
 - Express error responses are centralized through shared response helpers.
 
 ## Useful Commands

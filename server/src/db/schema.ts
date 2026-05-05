@@ -39,3 +39,12 @@ export const inviteTokens = pgTable("invite_tokens", {
   used: boolean("used").default(false).notNull(),
 });
 
+
+export const notes = pgTable('notes',{
+  id:uuid('id').primaryKey().defaultRandom(),
+  title:text('title'),
+  content :text('content'),
+  orgId :uuid("org_id").references(()=> organizations.id),
+  createdAt:timestamp("created_at").defaultNow(),
+  updatedAt:timestamp("updated_at").defaultNow()
+})
