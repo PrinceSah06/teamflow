@@ -2,6 +2,8 @@
 
 Teamflow is a full-stack team and organization management app. It includes user authentication, JWT-based protected routes, organization membership, role checks, invite links, and organization notes.
 
+The React client is connected to the Express API with Axios. After login, protected API requests include the JWT access token in the `Authorization` header, and the dashboard loads organization notes from the server.
+
 ## Tech Stack
 
 - Frontend: React, Vite, TypeScript, React Router, Zustand, Axios
@@ -15,8 +17,10 @@ Teamflow is a full-stack team and organization management app. It includes user 
 client/
   src/
     pages/          React pages
-    store/          Zustand auth state
+    hooks/          Client hooks, including note autosave
+    store/          Zustand auth and notes state
     config/         Axios client
+    componets/      Note UI components
 
 server/
   src/
@@ -104,6 +108,43 @@ npm run dev
 
 Frontend runs on `http://localhost:5173`.
 Backend runs on `http://localhost:5000`.
+
+## Client Routing
+
+The frontend uses React Router for public and protected routes.
+
+| Route | Access | Description |
+| --- | --- | --- |
+| `/` | Public | Home page with current auth state |
+| `/signup` | Logged-out users only | Create a new account |
+| `/login` | Logged-out users only | Log in and receive an access token |
+| `/dashboard` | Protected | Organization notes dashboard |
+| `/dashBoard` | Protected | Backward-compatible dashboard route |
+
+Routing behavior:
+
+- Logged-out users trying to open the dashboard are redirected to `/login`.
+- After login, users are redirected to the dashboard or back to the protected route they originally opened.
+- Logged-in users trying to open `/login` or `/signup` are redirected to `/dashboard`.
+- Signup creates an account, then redirects to `/login` because registration does not return an access token.
+- Unknown routes redirect to `/`.
+
+## Notes Dashboard
+
+The dashboard connects directly to the backend notes and organization APIs.
+
+On load:
+
+1. The client requests the logged-in user's organizations with `GET /api/orgs/me`.
+2. If the user has no organization, the client creates one with `POST /api/orgs`.
+3. The client loads notes for the active organization with `GET /notes/:id`.
+
+Note actions:
+
+- Create note: `POST /notes/:id`
+- Autosave note edits: `PATCH /notes/:orgId/:noteId`
+- Notes are stored in Zustand and synced through the shared Axios client.
+- Autosave is debounced so the app does not send a request on every key press.
 
 ## API Routes
 

@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom"
+import { Link, useLocation, useNavigate } from "react-router-dom"
 import { useState } from "react"
 import type { FormEvent } from "react"
 import { useAuthStore } from "../store/authStore"
@@ -9,6 +9,8 @@ type LoginForm = {
 }
 
 const Login = () => {
+  const navigate = useNavigate()
+  const location = useLocation()
   const login = useAuthStore((state) => state.login)
   const isLoading = useAuthStore((state) => state.isLoading)
   const [formData, setFormData] = useState<LoginForm>({
@@ -27,6 +29,8 @@ const Login = () => {
       const successMessage = await login(formData)
       setMessage(successMessage)
       setFormData({ email: "", password: "" })
+      const redirectTo = (location.state as { from?: string } | null)?.from ?? "/dashboard"
+      navigate(redirectTo, { replace: true })
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed")
     }

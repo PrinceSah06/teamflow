@@ -3,6 +3,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import userRoute from "./routes/userRoutes";
 import orgRoute from "./routes/orgRoutes";
+import notesRoute from "./routes/notes.routes";
 import { errorHandler, notFoundHandler } from "./middleware/errorMiddleware";
 
 const app = express();
@@ -19,6 +20,7 @@ app.use(cookieParser());
 
 app.use("/", userRoute);
 app.use("/", orgRoute);
+app.use("/", notesRoute);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

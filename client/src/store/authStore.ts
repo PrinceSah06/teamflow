@@ -31,8 +31,9 @@ type AuthSuccess = {
 
 const getErrorMessage = (error: unknown, fallback: string) => {
   if (error && typeof error === "object" && "response" in error) {
-    const response = (error as { response?: { data?: { message?: string } } }).response;
-    return response?.data?.message ?? fallback;
+    const response = (error as { response?: { data?: { error?: string; message?: string } } })
+      .response;
+    return response?.data?.error ?? response?.data?.message ?? fallback;
   }
 
   return fallback;
@@ -58,7 +59,7 @@ export const useAuthStore = create<AuthState>((set) => ({
 
     try {
       const response = await api.post("/login", payload);
-      const { accessToken, user, message } = response.data;
+      const { accessToken, user, message } = response.data.data;
 
       setAuthorizationHeader(accessToken);
       set({
@@ -81,7 +82,7 @@ export const useAuthStore = create<AuthState>((set) => ({
 
     try {
       const response = await api.post("/register", payload);
-      const { user, message } = response.data;
+      const { user, message } = response.data.data;
 
       set({
         user,

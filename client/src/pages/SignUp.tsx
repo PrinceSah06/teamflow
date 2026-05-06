@@ -1,6 +1,6 @@
 import { useState } from "react"
 import type { FormEvent } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { useAuthStore } from "../store/authStore"
 
 type SignUpForm = {
@@ -9,6 +9,7 @@ type SignUpForm = {
 }
 
 const SignUp = () => {
+  const navigate = useNavigate()
   const signup = useAuthStore((state) => state.signup)
   const isLoading = useAuthStore((state) => state.isLoading)
   const [formData, setFormData] = useState<SignUpForm>({
@@ -27,6 +28,7 @@ const SignUp = () => {
       const successMessage = await signup(formData)
       setMessage(successMessage)
       setFormData({ email: "", password: "" })
+      navigate("/login", { replace: true })
     } catch (err) {
       setError(err instanceof Error ? err.message : "Signup failed")
     }
