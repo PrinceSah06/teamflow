@@ -7,7 +7,7 @@ import notesRoute from "./routes/notes.routes";
 import { errorHandler, notFoundHandler } from "./middleware/errorMiddleware";
 
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT ? Number(process.env.PORT) : 5000;
 
 app.use(
   cors({
