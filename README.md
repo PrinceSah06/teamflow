@@ -74,7 +74,7 @@ npm install
 
 ### 3. Configure environment variables
 
-Create `server/src/.env`:
+Create `server/.env`:
 
 ```env
 DATABASE_URL=your_postgres_connection_string
@@ -82,6 +82,8 @@ ACCESS_TOKEN_SECRET=your_access_token_secret
 REFRESH_TOKEN_SECRET=your_refresh_token_secret
 ACCESS_EXPIRES=15m
 REFRESH_EXPIRES=7d
+CLIENT_URL=http://localhost:5173
+CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
 ```
 
 Create `client/.env`:
@@ -115,19 +117,25 @@ The backend is ready for Railway-style production deploys:
 
 - `server/package.json` includes `build` and `start` scripts.
 - The production entrypoint is `server/dist/index.js`.
-- The server reads `process.env.PORT` and falls back to `5000` locally.
+- The server reads `PORT` from the environment and falls back to `5000` locally.
 - TypeScript is installed as a production dependency so `npm run build` can run during deployment.
+
+Set these Railway variables:
+
+```env
+DATABASE_URL=your_postgres_connection_string
+ACCESS_TOKEN_SECRET=your_access_token_secret
+REFRESH_TOKEN_SECRET=your_refresh_token_secret
+ACCESS_EXPIRES=15m
+REFRESH_EXPIRES=7d
+CLIENT_URL=https://teamflow-git-main-prince-s-projects-717f0a10.vercel.app
+CORS_ORIGINS=https://teamflow-git-main-prince-s-projects-717f0a10.vercel.app
+```
 
 For the deployed frontend, set `client/.env` or the Vercel environment variable:
 
 ```env
 VITE_SERVER_API=https://your-railway-server-url
-```
-
-The server CORS allowlist includes the local Vite URLs and the deployed Vercel frontend URL:
-
-```txt
-https://teamflow-git-main-prince-s-projects-717f0a10.vercel.app
 ```
 
 ## Client Routing

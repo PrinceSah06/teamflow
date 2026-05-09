@@ -13,19 +13,13 @@ import {
   errorHandler,
   notFoundHandler
 } from "./middleware/errorMiddleware"
+import { env } from "./env"
 
 const app = express()
 
-const PORT = process.env.PORT ? Number(process.env.PORT) : 5000
-const allowedOrigins = [
-  "http://localhost:5173",
-  "http://127.0.0.1:5173",
-  "https://teamflow-git-main-prince-s-projects-717f0a10.vercel.app"
-]
-
 app.use(
   cors({
-    origin: allowedOrigins,
+    origin: env.CORS_ORIGINS,
     credentials: true
   })
 )
@@ -44,7 +38,7 @@ const server = http.createServer(app)
 
 const io = new Server(server, {
   cors: {
-    origin: allowedOrigins
+    origin: env.CORS_ORIGINS
   }
 })
 
@@ -65,8 +59,8 @@ io.emit('message','hello to all users')
     console.log("User disconnected")
   })
 })
-server.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`)
+server.listen(env.PORT, () => {
+  console.log(`Server running on port ${env.PORT}`)
 })
 
 export  {io}

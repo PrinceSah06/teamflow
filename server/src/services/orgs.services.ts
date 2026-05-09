@@ -2,6 +2,7 @@ import { db } from "../db";
 import { inviteTokens, member, organizations, users } from "../db/schema";
 import { and, eq } from "drizzle-orm";
 import crypto from "crypto";
+import { env } from "../env";
 
 const INVITE_EXPIRES_IN_MS = 48 * 60 * 60 * 1000;
 
@@ -94,7 +95,7 @@ export const generateInviteLinkService = async (
 
   return {
     inviteToken,
-    inviteLink: `http://localhost:5173/invite/${token}`,
+    inviteLink: `${env.CLIENT_URL}/invite/${token}`,
   };
 };
 
