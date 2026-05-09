@@ -5,6 +5,7 @@ import {
   acceptInvite,
   createInvite,
   createOrganization,
+  getOrganizationMembers,
   getMyOrganizations,
 } from "../controller/orgs.Controller";
 
@@ -12,6 +13,7 @@ const route = Router();
 
 route.post("/api/orgs", authMiddleware, createOrganization);
 route.get("/api/orgs/me", authMiddleware, getMyOrganizations);
+route.get("/api/orgs/:orgId/members", authMiddleware, getOrganizationMembers);
 route.post(
   "/api/orgs/:orgId/invite-link",
   authMiddleware,

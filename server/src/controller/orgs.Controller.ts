@@ -4,6 +4,7 @@ import {
   createOrgsService,
   generateInviteLinkService,
   myOrgsService,
+  orgMembersService,
 } from "../services/orgs.services";
 import { sendError, sendSuccess } from "../utils/apiResponse";
 
@@ -35,6 +36,29 @@ export const getMyOrganizations = async (req: Request, res: Response) => {
   return sendSuccess(res, 200, {
     userId,
     organizations,
+  });
+};
+
+export const getOrganizationMembers = async (req: Request, res: Response) => {
+  const userId = req.user?.userId;
+  const orgId = req.params.orgId;
+
+  if (!userId) {
+    return sendError(res, 401, "Unauthorized user");
+  }
+
+  if (!orgId || typeof orgId !== "string") {
+    return sendError(res, 400, "Organization id is required");
+  }
+
+  const members = await orgMembersService(userId, orgId);
+
+  if (!members) {
+    return sendError(res, 403, "You are not a member of this organization");
+  }
+
+  return sendSuccess(res, 200, {
+    members,
   });
 };
 

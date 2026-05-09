@@ -5,6 +5,7 @@ import Home from './pages/Home'
 import Login from './pages/Login'
 import SignUp from './pages/SignUp'
 import DashBoard from './pages/DashBoard';
+import InviteAccept from './pages/InviteAccept';
 import { useAuthStore } from './store/authStore';
 
 const PrivateRoute = ({ children }: { children: ReactNode }) => {
@@ -37,6 +38,7 @@ function App() {
     <Route path='/signup'  element={<PublicOnlyRoute><SignUp/></PublicOnlyRoute>} /> 
     <Route path='/dashboard'  element={<PrivateRoute><DashBoard/></PrivateRoute>} /> 
     <Route path='/dashBoard'  element={<PrivateRoute><DashBoard/></PrivateRoute>} /> 
+    <Route path='/invite/:token'  element={<PrivateRoute><InviteAccept/></PrivateRoute>} /> 
     <Route path='*' element={<Navigate to='/' replace />} />
     </Routes></>}
   export default App

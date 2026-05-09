@@ -1,5 +1,5 @@
 import { db } from "../db";
-import { inviteTokens, member, organizations } from "../db/schema";
+import { inviteTokens, member, organizations, users } from "../db/schema";
 import { and, eq } from "drizzle-orm";
 import crypto from "crypto";
 
@@ -39,6 +39,30 @@ export const myOrgsService = async (userId: string) => {
     .where(eq(member.userId, userId));
 
   return orgs;
+};
+
+export const orgMembersService = async (userId: string, orgId: string) => {
+  // First verify the logged-in user belongs to this org. If they do, every row
+  // returned below is another user connected through the same member.orgId.
+  const membership = await db.query.member.findFirst({
+    where: and(eq(member.userId, userId), eq(member.orgId, orgId)),
+  });
+
+  if (!membership) {
+    return null;
+  }
+
+  return db
+    .select({
+      id: member.id,
+      userId: users.id,
+      email: users.email,
+      role: member.role,
+      joinedAt: member.joinedAt,
+    })
+    .from(member)
+    .innerJoin(users, eq(member.userId, users.id))
+    .where(eq(member.orgId, orgId));
 };
 
 export const generateInviteLinkService = async (

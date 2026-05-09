@@ -1,109 +1,120 @@
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { useAutoSave } from "../hooks/useAutoSave";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import DashboardHeader from "../componets/DashboardHeader";
+import InvitePanel from "../componets/InvitePanel";
+import MembersPanel from "../componets/MembersPanel";
+import NoteEditer from "../componets/NoteEditer";
+import NotesSidebar from "../componets/NotesSidebar";
+import WorkspacePanel from "../componets/WorkspacePanel";
+import { socket } from "../lib/socket";
+import { useAuthStore } from "../store/authStore";
 import { useNotesStore } from "../store/notesStore";
 
 const DashBoard = () => {
+  const navigate = useNavigate();
+  const user = useAuthStore((state) => state.user);
+  const logout = useAuthStore((state) => state.logout);
   const notes = useNotesStore((state) => state.notes);
-  const [openInEditer, setOpenInEditer] = useState<string>("");
-  const [title, setTitle] = useState("");
-  const setActiveNote = useNotesStore((state) => state.setActiveNote);
   const activeNote = useNotesStore((state) => state.activeNote);
+  const organizations = useNotesStore((state) => state.organizations);
+  const orgMembers = useNotesStore((state) => state.orgMembers);
+  const orgId = useNotesStore((state) => state.orgId);
   const status = useNotesStore((state) => state.status);
   const error = useNotesStore((state) => state.error);
+  const inviteLink = useNotesStore((state) => state.inviteLink);
   const loadNotes = useNotesStore((state) => state.loadNotes);
+  const setActiveNote = useNotesStore((state) => state.setActiveNote);
   const createNote = useNotesStore((state) => state.createNote);
+  const deleteNote = useNotesStore((state) => state.deleteNote);
   const updateNote = useNotesStore((state) => state.updateNote);
+  const createOrganization = useNotesStore((state) => state.createOrganization);
+  const selectOrganization = useNotesStore((state) => state.selectOrganization);
+  const createInvite = useNotesStore((state) => state.createInvite);
+  const clearNotes = useNotesStore((state) => state.clearNotes);
+  const activeOrganization = organizations.find((org) => org.id === orgId);
 
   useEffect(() => {
     void loadNotes();
   }, [loadNotes]);
 
   useEffect(() => {
-    setTitle(activeNote?.title ?? "");
-    setOpenInEditer(activeNote?.content ?? "");
-  }, [activeNote]);
+    const handleConnect = () => {
+      if (orgId) {
+        socket.emit("join-room", orgId);
+      }
+    };
 
-  useAutoSave(activeNote?.id ?? null, { title, content: openInEditer }, updateNote);
+    const handleConnectError = (error: Error) => {
+      console.error("Socket connection error:", error.message);
+    };
+
+    socket.on("connect", handleConnect);
+    socket.on("connect_error", handleConnectError);
+
+    if (!socket.connected) {
+      socket.connect();
+    } else if (orgId) {
+      socket.emit("join-room", orgId);
+    }
+
+    return () => {
+      socket.off("connect", handleConnect);
+      socket.off("connect_error", handleConnectError);
+    };
+  }, [orgId]);
+
+  useEffect(() => {
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
+
+  const handleLogout = async () => {
+    await logout();
+    clearNotes();
+    navigate("/login", { replace: true });
+  };
 
   return (
-    <div className="min-h-svh bg-slate-50 px-4 py-6 text-left text-slate-900">
-      <div className="mx-auto grid max-w-6xl gap-5 md:grid-cols-[280px_1fr]">
-        <aside className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-          <div className="mb-4 flex items-center justify-between gap-3">
-            <div>
-              <Link className="text-sm font-semibold text-teal-700" to="/">
-                Home
-              </Link>
-              <h1 className="m-0 text-2xl font-bold text-slate-950">Dashboard</h1>
-            </div>
-            <button
-              className="rounded-md bg-slate-950 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800"
-              type="button"
-              onClick={() => void createNote()}
-            >
-              New
-            </button>
-          </div>
+    <div className="min-h-svh bg-slate-100 text-left text-slate-900">
+      <DashboardHeader email={user?.email} onLogout={() => void handleLogout()} />
 
-          <div className="grid gap-2">
-            {notes.map((note) => (
-              <button
-                className={`rounded-md border px-3 py-2 text-left transition ${
-                  activeNote?.id === note.id
-                    ? "border-teal-500 bg-teal-50"
-                    : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
-                }`}
-                key={note.id}
-                type="button"
-                onClick={() => {
-                  setActiveNote(note);
-                }}
-              >
-                <h2 className="m-0 truncate text-base font-semibold text-slate-950">
-                  {note.title || "Untitled note"}
-                </h2>
-                <p className="mt-1 line-clamp-2 text-sm text-slate-500">
-                  {note.content || "No content yet"}
-                </p>
-              </button>
-            ))}
-          </div>
+      <main className="mx-auto grid max-w-7xl gap-4 px-4 py-4 lg:grid-cols-[320px_1fr]">
+        <aside className="grid gap-4 lg:sticky lg:top-4 lg:self-start">
+          <WorkspacePanel
+            organizations={organizations}
+            activeOrganization={activeOrganization}
+            orgId={orgId}
+            onCreateOrganization={() => void createOrganization()}
+            onSelectOrganization={(selectedOrgId) => void selectOrganization(selectedOrgId)}
+          />
+
+          <MembersPanel members={orgMembers} currentUserId={user?.id} />
+
+          <NotesSidebar
+            notes={notes}
+            activeNote={activeNote}
+            onCreateNote={() => void createNote()}
+            onDeleteNote={(noteId) => void deleteNote(noteId)}
+            onSelectNote={setActiveNote}
+          />
         </aside>
 
-        <main className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-          <div className="mb-3 flex items-center justify-between gap-3 border-b border-slate-200 pb-3">
-            <p className="text-sm font-medium capitalize text-slate-500">{status}</p>
-            {error && <p className="text-sm font-semibold text-red-600">{error}</p>}
-          </div>
+        <section className="grid gap-4">
+          <InvitePanel
+            inviteLink={inviteLink}
+            onCreateInvite={(email) => createInvite(email)}
+          />
 
-          {activeNote ? (
-            <div className="grid gap-3">
-              <input
-                className="w-full rounded-md border border-slate-200 px-3 py-3 text-xl font-bold text-slate-950 outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
-                value={title}
-                placeholder="Note title"
-                onChange={(e) => setTitle(e.target.value)}
-              />
-
-              <textarea
-                className="min-h-[520px] w-full resize-none rounded-md border border-slate-200 px-3 py-3 text-base leading-7 text-slate-700 outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
-                name="Notes"
-                value={openInEditer}
-                placeholder="Start writing..."
-                onChange={(e) => setOpenInEditer(e.target.value)}
-              />
-            </div>
-          ) : (
-            <div className="grid min-h-[520px] place-items-center rounded-md border border-dashed border-slate-300 bg-slate-50 p-6 text-center">
-              <div>
-                <h2 className="m-0 text-xl font-bold text-slate-950">No notes yet</h2>
-                <p className="mt-2 text-slate-500">Create a note to start writing.</p>
-              </div>
-            </div>
-          )}
-        </main>
-      </div>
+          <NoteEditer
+            activeNote={activeNote}
+            status={status}
+            error={error}
+            onCreateNote={() => void createNote()}
+            onUpdateNote={updateNote}
+          />
+        </section>
+      </main>
     </div>
   );
 };

@@ -109,6 +109,27 @@ npm run dev
 Frontend runs on `http://localhost:5173`.
 Backend runs on `http://localhost:5000`.
 
+## Deployment Notes
+
+The backend is ready for Railway-style production deploys:
+
+- `server/package.json` includes `build` and `start` scripts.
+- The production entrypoint is `server/dist/index.js`.
+- The server reads `process.env.PORT` and falls back to `5000` locally.
+- TypeScript is installed as a production dependency so `npm run build` can run during deployment.
+
+For the deployed frontend, set `client/.env` or the Vercel environment variable:
+
+```env
+VITE_SERVER_API=https://your-railway-server-url
+```
+
+The server CORS allowlist includes the local Vite URLs and the deployed Vercel frontend URL:
+
+```txt
+https://teamflow-git-main-prince-s-projects-717f0a10.vercel.app
+```
+
 ## Client Routing
 
 The frontend uses React Router for public and protected routes.
