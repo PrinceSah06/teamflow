@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { db } from "../db";
-import { refreshTokenTable, users } from "../db/schema";
+import { refreshTokenTable, users, organizations } from "../db/schema";
 import { compareHash, hashPassword } from "../utils/hashPassword";
 import { generateAccessToken, generateRefreshToken } from "../utils/tokens";
 
@@ -80,4 +80,15 @@ export const logoutUser = async (refreshToken: string) => {
   await db
     .delete(refreshTokenTable)
     .where(eq(refreshTokenTable.token, refreshToken));
+};
+
+export const deleteUser = async (userId: string) => {
+  await db.transaction(async (tx) => {
+    // Orgs don't have cascade delete on ownerId, so we must delete them manually
+    // This will cascade to members, invites, and notes of those orgs
+    await tx.delete(organizations).where(eq(organizations.ownerId, userId));
+    
+    // Finally delete the user
+    await tx.delete(users).where(eq(users.id, userId));
+  });
 };

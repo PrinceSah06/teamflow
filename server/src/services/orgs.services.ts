@@ -139,3 +139,39 @@ export const acceptInviteService = async (userId: string, token: string) => {
 
   return { success: true, status: 200, message: "Joined organization" };
 };
+
+export const removeMemberService = async (requesterId: string, orgId: string, targetUserId: string) => {
+  // Check if the requester is in the org
+  const requesterMembership = await db.query.member.findFirst({
+    where: and(eq(member.userId, requesterId), eq(member.orgId, orgId)),
+  });
+
+  if (!requesterMembership) {
+    return { success: false, status: 403, error: "Not authorized" };
+  }
+
+  // If requester is not the target user, they must be admin or owner to remove someone else
+  if (requesterId !== targetUserId) {
+    if (requesterMembership.role !== "owner" && requesterMembership.role !== "admin") {
+      return { success: false, status: 403, error: "Only admins or owners can remove members" };
+    }
+  }
+
+  // Check the target user's membership
+  const targetMembership = await db.query.member.findFirst({
+    where: and(eq(member.userId, targetUserId), eq(member.orgId, orgId)),
+  });
+
+  if (!targetMembership) {
+    return { success: false, status: 404, error: "Member not found in organization" };
+  }
+
+  // Prevent removing the owner unless the organization is being deleted (which is handled elsewhere)
+  if (targetMembership.role === "owner") {
+    return { success: false, status: 400, error: "Cannot remove the owner of the organization" };
+  }
+
+  await db.delete(member).where(eq(member.id, targetMembership.id));
+
+  return { success: true, status: 200, message: "Member removed successfully" };
+};

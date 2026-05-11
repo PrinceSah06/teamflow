@@ -5,6 +5,7 @@ import {
   generateInviteLinkService,
   myOrgsService,
   orgMembersService,
+  removeMemberService,
 } from "../services/orgs.services";
 import { sendError, sendSuccess } from "../utils/apiResponse";
 
@@ -107,6 +108,34 @@ export const acceptInvite = async (req: Request, res: Response) => {
 
   if (!result.success) {
     return sendError(res, result.status, result.error || "Unable to accept invite");
+  }
+
+  return sendSuccess(res, result.status, {
+    message: result.message,
+  });
+};
+
+export const removeMember = async (req: Request, res: Response) => {
+  const userId = req.user?.userId;
+  const orgId = req.params.orgId;
+  const memberId = req.params.memberId;
+
+  if (!userId) {
+    return sendError(res, 401, "Unauthorized user");
+  }
+
+  if (!orgId || typeof orgId !== "string") {
+    return sendError(res, 400, "Organization id is required");
+  }
+
+  if (!memberId || typeof memberId !== "string") {
+    return sendError(res, 400, "Member id is required");
+  }
+
+  const result = await removeMemberService(userId, orgId, memberId);
+
+  if (!result.success) {
+    return sendError(res, result.status, result.error || "Unable to remove member");
   }
 
   return sendSuccess(res, result.status, {

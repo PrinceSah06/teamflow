@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { createUser, loginUser, logoutUser } from "../services/user.services";
+import { createUser, loginUser, logoutUser, deleteUser } from "../services/user.services";
 import { sendError, sendSuccess } from "../utils/apiResponse";
 
 export const registerUserController = async (req: Request, res: Response) => {
@@ -39,7 +39,7 @@ export const loginUserController = async (req: Request, res: Response) => {
 
 export const logoutController = async (req: Request, res: Response) => {
   const refreshToken = req.cookies.refreshToken;
- 
+
   if (!refreshToken) {
     return sendError(res, 400, "refreshToken is required");
   }
@@ -48,4 +48,16 @@ export const logoutController = async (req: Request, res: Response) => {
   res.clearCookie("refreshToken");
 
   return sendSuccess(res, 200, {});
+};
+
+export const deleteUserController = async (req: Request, res: Response) => {
+  const userId = req.user?.userId;
+  if (!userId) {
+    return sendError(res, 401, "Unauthorized");
+  }
+
+  await deleteUser(userId);
+  res.clearCookie("refreshToken");
+
+  return sendSuccess(res, 200, { message: "User deleted successfully" });
 };
