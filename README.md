@@ -237,3 +237,7 @@ cd client
 npm run dev
 npm run build
 ```
+
+## Recent Fixes
+
+- Fixed an issue where React 18 Strict Mode double-firing `useEffect` caused invite links to incorrectly report as "Already used" when accepted.

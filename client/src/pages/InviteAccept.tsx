@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import api from "../config/axios";
 import { useNotesStore } from "../store/notesStore";
@@ -9,6 +9,7 @@ const InviteAccept = () => {
   const loadNotes = useNotesStore((state) => state.loadNotes);
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
   const [message, setMessage] = useState("Joining organization...");
+  const hasFetched = useRef(false);
 
   useEffect(() => {
     const acceptInvite = async () => {
@@ -17,6 +18,9 @@ const InviteAccept = () => {
         setMessage("Invite token is missing.");
         return;
       }
+
+      if (hasFetched.current) return;
+      hasFetched.current = true;
 
       try {
         const response = await api.post(`/api/invites/${token}/accept`);
